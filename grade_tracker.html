@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>grade tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 18px;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        p{
+            text-align: center;
+            color: #555;
+            font-size: 16px;
+        }
+
+        form {
+            max-width: 600px;
+            margin: 8% auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        input[type="submit"] {
+            background-color: #28a745;
+            color: white;
+            margin-left: 40%;
+            padding: 10px 15px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            width: 100px;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+
+<body>
+        <form>
+            <h1>grade tracker</h1>
+        <p>this program will track the grades of students and calculate their average score to determine if the student has passed or failed based on their it.</p>
+        
+            <label for="name">student's name:</label>
+            <input type="text" id="name" name="name"><br><br>
+            <label for="Scores">enter the scores separated by a comma:</label>
+            <input type="text" id="scores" name="scores"><br><br>
+            <input type="submit" value="submit" id="submit"><br><br>
+            
+        
+            <div id="output"></div>
+        </form>
+</body>
+
+<script>
+let studentData= []
+const pastGrades=JSON.parse(localStorage.getItem("pastGrades")) || []
+if (pastGrades.length > 0) {
+    studentData = pastGrades;
+    printStudentReport(studentData);
+}
+
+
+document.getElementById("submit").addEventListener("click", function(event){
+    event.preventDefault()
+        let name= document.getElementById("name").value
+        let scores_input = document.getElementById("scores").value
+        
+        if (name=="" || scores_input==""){
+            alert("please fill in all fields")
+            return
+        }
+
+        let scores = scores_input.split(',').map(score => score.trim()).map(Number);
+        
+        if (scores.length === 0 || scores.some(score => isNaN(score))) {
+            alert("Please enter valid scores");
+            return;
+        }
+        if (scores.some(score => score < 0 || score > 100)) {
+            alert("required: 0<scores<100 !!!");
+            return;
+        }
+        
+    addStudent(name, scores)
+})
+
+function addStudent(name, scores){
+    const student={
+        name: name,
+        scores: scores,
+    }
+    studentData.push(student);
+    localStorage.setItem("pastGrades", JSON.stringify(studentData));
+    printStudentReport(studentData);
+}
+
+function getAverage(Scores){
+    let sum=0
+    for (let i=0; i< Scores.length; i++){
+        sum+= Scores[i]
+    }
+    return sum/Scores.length
+}
+
+function printStudentReport(studentData){
+
+    var output = document.getElementById("output")
+    output.innerText = ""; // Clear previous output
+    for (let student of studentData){
+        let student_report = document.createElement("div")
+        let report = "student: " + student.name + "\nscores: " + student.scores.join(", ") + "\naverage score: " + getAverage(student.scores).toFixed(1);
+        if (getAverage(student.scores) >= 60) {
+            report += "\nstatus: pass✅";
+            student_report.style.backgroundColor = "rgb(0, 245, 10)";
+        } else {
+            report += "\nstatus: fail⛔";
+            student_report.style.backgroundColor = "rgb(245, 0, 10)";
+        }
+        
+        student_report.style.padding = "10px";
+        student_report.style.margin = "10px 0";
+        student_report.style.borderRadius = "8px";
+        student_report.innerText = report;
+        output.appendChild(student_report)
+    }
+    
+}
+
+</script>
+</html>
